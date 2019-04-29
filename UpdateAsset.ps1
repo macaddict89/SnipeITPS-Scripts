@@ -11,14 +11,13 @@ $osField = "_snipeit_os_4"
 $storageField = "_snipeit_storage_5"
 
 #Get Snazy2000's Powershell module for Snipe-IT https://github.com/snazy2000/SnipeitPS
-#This requires allowing modules from PSGallery as well as AllowClober of the Get-Location cmdlet, as it conflicts with a built in PS cmdlet. 
-#Ideally, Snazy would change Get-Location to Get-Locations https://github.com/snazy2000/SnipeitPS/issues/14
+#This requires allowing modules from PSGallery
 if (Get-Module -ListAvailable -Name SnipeitPS ) {
     Write-Output "Snipe-IT Module Installed, proceeding..."
 }
 else {
     Write-Output "Snipe-IT Module not found, installing..."
-    Install-Module SnipeitPS -AllowClobber -Force -Confirm:false
+    Install-Module SnipeitPS
 }
 
 Import-Module SnipeitPS
