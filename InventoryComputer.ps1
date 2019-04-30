@@ -56,7 +56,7 @@ Write-Output "Getting Computer System Information via WMI"
 Get-WmiObject -Class Win32_ComputerSystem
 Get-WmiObject -Class Win32_Bios
 Get-WmiObject -Class Win32_Processor
-Get-WmiObject -Class Win32_DiskDrive
+Get-WmiObject -Class Win32_DiskDrive -Filter "DeviceID = '\\\\.\\PHYSICALDRIVE0'"
 Get-WmiObject -Class Win32_OperatingSystem | select Caption, BuildNumber,OSArchitecture
 $wmiComputerSystem = Get-WmiObject -Class Win32_ComputerSystem
 $wmiBios = Get-WmiObject -Class Win32_Bios
