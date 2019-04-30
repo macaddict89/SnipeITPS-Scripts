@@ -129,7 +129,7 @@ if(([string]::IsNullOrEmpty($asset))){
     #change or remove custom fields if not being used for your deployment
     #Allowing for more custom fields for a laptop if necessary; does not need to be split if not using additional fields
     # for laptops e.g. wireless mac address
-    if ($wmiComputerSystem.PCSystemTypeEx -eq 2) { $asset = New-Asset -Name $computerName -Status_id $statusID -Model_id $modelID -customfields @{"serial" = $wmiBios.SerialNumber; $macaddressField = $wiredMacFormatted; $processorField = $wmiProcessor.Name; $memoryField = "$($memoryAmount)GB"; $osField = $wmiOS.Caption; $storageField = "$($wmiDisks.model + " " + $wmiDisks.GB)GB"} }
+    if ($wmiComputerSystem.PCSystemTypeEx -eq 2) { $asset = New-Asset -Name $computerName -Status_id $statusID -Model_id $modelID -customfields @{"serial" = $wmiBios.SerialNumber; $macaddressField = $wiredMacFormatted; $processorField = $wmiProcessor.Name; $memoryField = "$($memoryAmount)GB"; $osField = $wmiOS.Caption; $storageField = "$($wmiDisks.model + " " + $wmiDisks.GB)GB"; $mac2Field = $wirelessMacFormatted} }
     else { $asset = New-Asset -Name $computerName -Status_id $statusID -Model_id $modelID -customfields @{"serial" = $wmiBios.SerialNumber; $macaddressField = $wiredMacFormatted; $processorField = $wmiProcessor.Name; $memoryField = "$($memoryAmount)GB"; $osField = $wmiOS.Caption; $storageField = "$($wmiDisks.model + " " + $wmiDisks.GB)GB"} }
     $tag = $asset.asset_tag
     $assetID = $asset.id
@@ -143,7 +143,7 @@ if(([string]::IsNullOrEmpty($asset))){
 else {
     $assetID = $asset.id
     Write-Output "Asset $computerName ($tag) exists. Creating Reimage maintenance"
-    if ($wmiComputerSystem.PCSystemTypeEx -eq 2) { Set-Asset -id $assetID -Name $asset.name -Model_id $asset.model.id -Status_id $statusID -customfields @{$macaddressField = $wiredMacFormatted ; $processorField = $wmiProcessor.Name; $memoryField = "$($memoryAmount)GB"; $osField = $wmiOS.Caption; $storageField = "$($wmiDisks.model + " " + $wmiDisks.GB)GB"} }
+    if ($wmiComputerSystem.PCSystemTypeEx -eq 2) { Set-Asset -id $assetID -Name $asset.name -Model_id $asset.model.id -Status_id $statusID -customfields @{$macaddressField = $wiredMacFormatted ; $processorField = $wmiProcessor.Name; $memoryField = "$($memoryAmount)GB"; $osField = $wmiOS.Caption; $storageField = "$($wmiDisks.model + " " + $wmiDisks.GB)GB"; $mac2Field = $wirelessMacFormatted} }
     else { Set-Asset -id $assetID -Name $asset.name -Model_id $asset.model.id -Status_id $statusID -customfields @{$macaddressField = $wiredMacFormatted; $processorField = $wmiProcessor.Name; $memoryField = "$($memoryAmount)GB"; $osField = $wmiOS.Caption; $storageField = "$($wmiDisks.model + " " + $wmiDisks.GB)GB"} }
     New-AssetMaintenance -asset_id $assetID -supplier_id $supplierID -asset_maintenance_type "Maintenance" -title $maintTitle -start_date $Today -completion_Date $Today
 }
