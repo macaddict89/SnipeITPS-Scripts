@@ -9,6 +9,7 @@ $processorField = "_snipeit_processor_2"
 $memoryField = "_snipeit_memory_3"
 $osField = "_snipeit_os_4"
 $storageField = "_snipeit_storage_5"
+$mac2Field = "_snipeit_mac_address_2_6"
 
 #Get Snazy2000's Powershell module for Snipe-IT https://github.com/snazy2000/SnipeitPS
 #This requires allowing modules from PSGallery
@@ -36,15 +37,22 @@ $wmiComputerSystem = Get-WmiObject -Class Win32_ComputerSystem
 $wmiBios = Get-WmiObject -Class Win32_Bios
 $wmiProcessor = Get-WmiObject -Class Win32_Processor
 $wmiDisks = Get-WmiObject -Class Win32_DiskDrive | select model, @{Name="GB"; Expression={[math]::round($_.size/1GB)}}
-$wmiNetwork = Get-WmiObject -Class Win32_NetworkAdapterConfiguration
+$nics = Get-NetAdapter -Physical
 $wmiOS = Get-WmiObject -Class Win32_OperatingSystem | select Caption, BuildNumber,OSArchitecture
 $computerName = $wmiComputerSystem.Name
+$wired = $nics | where PhysicalMediaType -eq "802.3"
+$wiredMAC = $wired.MacAddress
+$wiredMacFormatted = $wiredMAC -replace "-",":"
+if ($wmiComputerSystem.PCSystemTypeEx -eq 2) {
+    $wireless = $nics | where PhysicalMediaType -like "*802.11*"
+    $wirelessMAC = $wireless.MacAddress
+    $wirelessMacFormatted = $wirelessMAC -replace "-",":"  }
 
 #Check if Asset already exists. If so update the asset with a maintenance of computer reimage
 Write-Output "Searching for Existing Asset $computerName"
 $asset = Get-Asset -search $computerName
 if(([string]::IsNullOrEmpty($asset))){
-    Write-Output "Asset $computerName does not exist! exiting"
+    Write-Output "Asset $computerName does not exist! Please add to inventory before using this script"
 }
 else {
     $assetID = $asset.id
@@ -53,7 +61,8 @@ else {
     $statusID = $asset.status_label.id
     Write-Output "Asset $computerName found! Updating custom fields..."
     $memoryAmount = [math]::Round($wmiComputerSystem.TotalPhysicalMemory/1GB)
-    $update = Set-Asset  -id $assetID -customfields @{$macaddressField = $wmiNetwork.MACAddress[1]; $processorField = $wmiProcessor.Name; $memoryField = "$($memoryAmount)GB"; $osField = $wmiOS.Caption; $storageField = "$($wmiDisks.model + " " + $wmiDisks.GB)GB"}
+    if ($wmiComputerSystem.PCSystemTypeEx -eq 2) { Set-Asset -id $assetID -Name $asset.name -Model_id $asset.model.id -Status_id $statusID -customfields @{$macaddressField = $wiredMacFormatted ; $processorField = $wmiProcessor.Name; $memoryField = "$($memoryAmount)GB"; $osField = $wmiOS.Caption; $storageField = "$($wmiDisks.model + " " + $wmiDisks.GB)GB"; $mac2Field = $wirelessMacFormatted} }
+    else { Set-Asset -id $assetID -Name $asset.name -Model_id $asset.model.id -Status_id $statusID -customfields @{$macaddressField = $wiredMacFormatted; $processorField = $wmiProcessor.Name; $memoryField = "$($memoryAmount)GB"; $osField = $wmiOS.Caption; $storageField = "$($wmiDisks.model + " " + $wmiDisks.GB)GB"} }
     Write-Output "Asset $computerName updated!"
     Write-Output $update
 }
