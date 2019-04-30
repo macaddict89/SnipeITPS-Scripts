@@ -125,10 +125,10 @@ if(([string]::IsNullOrEmpty($asset))){
     New-AssetMaintenance -asset_id $assetID -supplier_id $supplierID -asset_maintenance_type "Maintenance" -title $maintTitle -start_date $Today -completion_Date $Today
  
 }
-#Asset exists
+#Asset exists.  Create a reimage maintenance item and update the custom fields if desired
 else {
     $assetID = $asset.id
     Write-Output "Asset $computerName ($tag) exists. Creating Reimage maintenance"
-    Set-Asset -id $assetID -Name $asset.name -Model_id $asset.model.id -Status_id $asset.status_label.id -customfields @{$macaddressField = $wmiNetwork.MACAddress[1]; $processorField = $wmiProcessor.Name; $memoryField = "$($memoryAmount)GB"; $osField = $wmiOS.Caption; $storageField = "$($wmiDisks.model + " " + $wmiDisks.GB)GB"}
+    Set-Asset -id $assetID -Name $asset.name -Model_id $asset.model.id -Status_id $statusID -customfields @{$macaddressField = $wmiNetwork.MACAddress[1]; $processorField = $wmiProcessor.Name; $memoryField = "$($memoryAmount)GB"; $osField = $wmiOS.Caption; $storageField = "$($wmiDisks.model + " " + $wmiDisks.GB)GB"}
     New-AssetMaintenance -asset_id $assetID -supplier_id $supplierID -asset_maintenance_type "Maintenance" -title $maintTitle -start_date $Today -completion_Date $Today
 }
