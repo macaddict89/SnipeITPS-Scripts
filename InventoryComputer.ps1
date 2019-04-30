@@ -142,6 +142,7 @@ if(([string]::IsNullOrEmpty($asset))){
 #Asset exists.  Create a reimage maintenance item and update the custom fields if desired
 else {
     $assetID = $asset.id
+    $memoryAmount = [math]::Round($wmiComputerSystem.TotalPhysicalMemory/1GB)
     Write-Output "Asset $computerName ($tag) exists. Creating Reimage maintenance"
     if ($wmiComputerSystem.PCSystemTypeEx -eq 2) { Set-Asset -id $assetID -Name $asset.name -Model_id $asset.model.id -Status_id $statusID -customfields @{$macaddressField = $wiredMacFormatted ; $processorField = $wmiProcessor.Name; $memoryField = "$($memoryAmount)GB"; $osField = $wmiOS.Caption; $storageField = "$($wmiDisks.model + " " + $wmiDisks.GB)GB"; $mac2Field = $wirelessMacFormatted} }
     else { Set-Asset -id $assetID -Name $asset.name -Model_id $asset.model.id -Status_id $statusID -customfields @{$macaddressField = $wiredMacFormatted; $processorField = $wmiProcessor.Name; $memoryField = "$($memoryAmount)GB"; $osField = $wmiOS.Caption; $storageField = "$($wmiDisks.model + " " + $wmiDisks.GB)GB"} }
